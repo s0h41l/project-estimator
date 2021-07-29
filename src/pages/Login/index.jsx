@@ -1,14 +1,38 @@
-import { useState, useRef } from 'react';
-import './login.css';
+import { useState, useRef, useEffect } from 'react';
+import app from '../../utils/firebase';
+import './index.css';
 
 const Login = (props) => {
 
+    // States
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState('');
+
+    // References
     const email = useRef('');
     const password = useRef('');
 
-    const loginHander = () => {
+    //Event Handlers
+    const loginHander = async (event) => {
+        setLoading(true);
+        event.preventDefault();
 
-        const [_email, _pass] = [email.current.value, password.current.value]
+        const [_email, _pass] = [
+            email.current.value,
+            password.current.value
+        ]
+
+        try {
+            const isAuthenticated = await app.auth().signInWithEmailAndPassword(_email, _pass);
+            
+            setLoading(false);
+
+        } catch (error) {
+            setLoading(false);
+            setError(error.message);
+        }
+
+        
 
         console.log(_email, _pass);
     }
@@ -19,24 +43,32 @@ const Login = (props) => {
                 LOGIN
             </h1>
 
-            <input
-                type="email"
-                className="form-control my-2"
-                placeholder="Enter email"
-                ref={email}
-                
-            />
+            <form onSubmit={loginHander}>
+                <input
+                    type="email"
+                    className="form-control my-2"
+                    placeholder="Enter email"
+                    ref={email}
+                    required
+                    
+                />
 
-            <input
-                type="password"
-                className="form-control my-2"
-                placeholder="Enter password"
-                ref={password}
-            />
+                <input
+                    type="password"
+                    className="form-control my-2"
+                    placeholder="Enter password"
+                    ref={password}
+                    required
+                />
 
-            <button className="btn btn-info float-right" onClick={loginHander}>
-                LOGIN
-            </button>
+                {error && <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>}
+
+                <button className="btn btn-info float-right" type="submit">
+                    LOGIN
+                </button>
+            </form>
         </div>
     );
 };
