@@ -1,7 +1,11 @@
-body {
-    background: #2c5197;
-}
-
 * {
     border-radius: 0 !important;
+}
+
+.home-brand {
+    color: white !important
+}
+
+.home-brand:hover {
+    color: rgb(211, 208, 208) !important
 }
