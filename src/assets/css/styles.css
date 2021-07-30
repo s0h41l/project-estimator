@@ -9,3 +9,7 @@
 .home-brand:hover {
     color: rgb(211, 208, 208) !important
 }
+
+.cursor {
+    cursor: pointer;
+}

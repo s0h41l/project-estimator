@@ -12,7 +12,6 @@ const Login = (props) => {
     const { currentUser } = useContext(AuthContext);
 
     if(currentUser){
-        console.log(currentUser);
         history.push('/');
     }
 

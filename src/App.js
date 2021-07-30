@@ -5,7 +5,7 @@ import Login from './pages/Login/index';
 import Dashboard from './pages/Dashboard/index';
 import Header from "./components/Header";
 
-import { AuthContext, AuthProvider } from "./contexts/Auth";
+import { AuthContext } from "./contexts/Auth";
 
 import './assets/css/bootstrap-4.css';
 import './assets/css/styles.css';
