@@ -29,7 +29,7 @@ const Dashboard = (props) => {
     const [description, setDescription] = useState('');
 
     // Event Handlers
-    const saveFormHandler = (event) => {
+    const saveFormHandler = async (event) => {
         
         setLoading(true);
         const { name, description } = event.target.elements;
@@ -39,7 +39,7 @@ const Dashboard = (props) => {
             event.preventDefault();
 
             if(formMode == 'create'){
-                firebase.database().ref('projects').push({
+                await firebase.database().ref('projects').push({
                     name: name.value,
                     description: description.value,
                     addedBy: currentUser.uid
@@ -47,7 +47,7 @@ const Dashboard = (props) => {
         
                 setMessage('Project Posted!');
             }else{
-                firebase.database().ref('projects').child(projectId).update({
+                await firebase.database().ref('projects').child(projectId).update({
                     name: name.value,
                     description: description.value
                 });
@@ -116,11 +116,13 @@ const Dashboard = (props) => {
     function deleteProject(){
         if(window.confirm('Are you sure you want to delete this project?')){
             setLoading(true);
+            setFormMode('');
+            clearFields();
             try {
                 firebase.database().ref('projects').child(this).remove();
                 setMessage('Project deleted!');
                 setLoading(false);
-                setTimeout(() => setMessage(''), 1500);
+                setTimeout(() => setMessage(''), 2000);
             } catch (error) {
                 setError(error.message);
                 setLoading(false);

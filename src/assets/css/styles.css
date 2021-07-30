@@ -1,6 +1,6 @@
-* {
+/* * {
     border-radius: 0 !important;
-}
+} */
 
 .home-brand {
     color: white !important
@@ -20,4 +20,14 @@ html {
 
 .openModal {
     background: rgba(44, 57, 75, 0.7);
+}
+
+.btn-xs {
+    height: 25px;
+    padding-top: 2px;
+}
+
+.project-details { 
+    font-size: 15px;
+    line-height: 19px;
 }

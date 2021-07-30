@@ -1,6 +1,8 @@
 
 import { useEffect, useState } from 'react';
 import firebase from 'firebase';
+import EstimationForm from './EstimationForm';
+import EstimationItem from '../components/EstimationItem';
 
 
 const ProjectModal = (props) => {
@@ -21,6 +23,7 @@ const ProjectModal = (props) => {
 
     const [loading, setLoading] = useState(false);
     const [project, setProject] = useState({});
+    const [estimationList, setEstimations] = useState([]);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
 
@@ -28,7 +31,23 @@ const ProjectModal = (props) => {
         setLoading(true);
         try {
             firebase.database().ref('projects').child(id).once('value', (snap) => {
+                
+                const { estimations } = snap.val();
+
+
+                if(estimations){
+                    const keys = Object.keys(estimations);
+                    setEstimations(keys.map(key => ({
+                        ...estimations[key],
+                        key
+                    })));
+
+                }
+
+                // setEstimations(estimations);
+
                 setProject(snap.val());
+
                 setLoading(false);
             });   
         } catch (error) {
@@ -52,10 +71,8 @@ const ProjectModal = (props) => {
                         <span>×</span>
                     </button>
                 </div>
-                <div className="modal-body" style={{height: '50vh', overflowY: 'auto'}}>
-                    <p>{project.description}</p>
-
-
+                <div className="modal-body" style={{height: '70vh', overflowY: 'auto'}}>
+                    <p className="project-details">{project.description}</p>
 
                     <div className="container my-4">
                         {error && <div className="alert alert-danger" role="alert">
@@ -71,18 +88,38 @@ const ProjectModal = (props) => {
                         </p>}
                     </div>
 
-                    <div className="container border">
-                        jk
+                    <hr/>
+
+                    <EstimationForm
+                        projectId = {id}
+                    />
+
+                    <hr />
+
+                    <h4 className="text-info">
+                        ESTIMATIONS
+                    </h4>
+
+
+                    <div>
+
+                        {estimationList.map(estimation => <EstimationItem
+                            title={estimation.title}
+                            details={estimation.details}
+                            time={estimation.time}
+                            category = {estimation.category}
+                            key={estimation.key}
+                        />)}
                     </div>
 
                 </div>
                 <div className="modal-footer">
 
-                <button
+                {/* <button
                     className="btn btn-sm btn-primary mx-0"
                     onClick={addEstimateEvent}
                     >ADD ESTIMATION
-                </button>
+                </button> */}
 
                     <button
                         type="button"
