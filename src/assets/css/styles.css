@@ -13,3 +13,11 @@
 .cursor {
     cursor: pointer;
 }
+
+html {
+    scroll-behavior: smooth;
+}
+
+.openModal {
+    background: rgba(44, 57, 75, 0.7);
+}

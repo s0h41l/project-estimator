@@ -55,11 +55,11 @@ const Dashboard = (props) => {
                 setMessage('Project Updated!');
                 setFormMode('');
             }
-    
-            setLoading(false);
             
             clearFields();
             
+            setLoading(false);
+
             setTimeout(() => setMessage(''), 1500);
             
         } catch (error) {
@@ -94,6 +94,7 @@ const Dashboard = (props) => {
                     setDescription(description);
                     setLoading(false);
                     setFormMode('edit');
+                    window.scrollTo(0, 0)
                 }
 
             });   
@@ -149,11 +150,6 @@ const Dashboard = (props) => {
                                         className="btn btn-primary float-right"
                                         onClick={() => setFormMode('create')}
                                     >POST PROJECT</button>}
-                {formMode !== '' && <button
-                                        className="btn btn-secondary float-right"
-                                        onClick={cancelFormHandler}>
-                                        CANCEL
-                                    </button>}
             </div>
 
 
@@ -194,9 +190,16 @@ const Dashboard = (props) => {
 
                     <button
                         type="submit"
-                        className="btn btn-info"
-                    >{formMode == 'create' ? "POST" : "UPDATE"}
+                        className="btn btn-info">
+                        {formMode == 'create' ? "POST" : "UPDATE"}
                     </button>
+
+                    {formMode !== '' && <button
+                                        className="btn btn-secondary ml-1"
+                                        onClick={cancelFormHandler}>
+                                        CANCEL
+                                    </button>
+                    }
 
                 </form>
             </div>}

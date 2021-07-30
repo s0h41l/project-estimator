@@ -39,7 +39,7 @@ const ProjectModal = (props) => {
 
 
     return (
-        <div className="modal fade show d-block">
+        <div className="modal fade show d-block openModal">
             <div className="modal-dialog">
                 <div className="modal-content">
                 <div className="modal-header pt-2 pb-1">

@@ -32,7 +32,7 @@ const Header = (props) => {
 
         <div className="w-100">
             <a className="na float-right text-white mx-2 cursor" onClick={() => app.auth().signOut()}>LogOut</a>
-            <span className="float-right text-white">{name}</span>
+             <span className="ml-2 float-right text-white">|</span> <span className="float-right text-white">{name.toUpperCase()}</span>
         </div>
 
         </nav>
