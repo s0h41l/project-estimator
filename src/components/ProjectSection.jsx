@@ -83,8 +83,12 @@ const ProjectSection = (props) => {
                 {
                     version !== estimation.version && <h6
                         className={
-                            `font-weight-bold ${
-                                estimation.category === 'backend' ? 'text-secondary' : estimation.category == 'frontend' ? 'text-primary' : 'text-success'
+                            `font-weight-bold border-bottom ${
+                                estimation.category === 'backend' 
+                                    ? 'text-secondary border-secondary' :
+                                    estimation.category == 'frontend' ?
+                                    'text-primary border-primary' :
+                                    'text-success border-success'
                             }`
                         }>{
                             estimation.version
@@ -190,45 +194,6 @@ const ProjectSection = (props) => {
             <div>
             </div>
         </div>
-
-
-
-        
-        // <div className="modal fade show d-block openModal">
-        //     <div className="modal-dialog">
-        //         <div className="modal-content">
-        //         <div className="modal-header pt-2 pb-1">
-        //             <h5>{project.name}</h5>
-        //             <button
-        //                 type="button"
-        //                 className="close"
-        //                 onClick={closeEvent}
-        //                 >
-        //                 <span>×</span>
-        //             </button>
-        //         </div>
-        //         <div className="modal-body" style={{height: '70vh', overflowY: 'auto'}}>
-
-
-        //         </div>
-        //         <div className="modal-footer">
-
-        //         {/* <button
-        //             className="btn btn-sm btn-primary mx-0"
-        //             onClick={addEstimateEvent}
-        //             >ADD ESTIMATION
-        //         </button> */}
-
-                    // <button
-                    //     type="button"
-                    //     className="btn btn-sm btn-secondary"
-                    //     onClick={closeEvent}
-                    // >Close</button>
-        //             {/* <button type="button" className="btn btn-sm btn-primary">Save changes</button> */}
-        //         </div>
-        //         </div>
-        //     </div>
-        // </div>
     );
 }
 
