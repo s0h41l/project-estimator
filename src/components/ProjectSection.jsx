@@ -30,22 +30,23 @@ const ProjectSection = (props) => {
     const fetchProject = (id) => {
         setLoading(true);
         try {
+
+            firebase.database().ref(`projects`).child(id).on('value', (snap) => {
+                setProject(snap.val());
+                setLoading(false);
+            });  
+
+
             firebase.database().ref(`projects/${id}/estimations`).orderByChild('version').on('value', (snap) => {
-                console.log(snap.val())
                 if(snap && snap.val()){
                     const estimations = snap.val();
-
                     if(estimations){
                         const keys = Object.keys(estimations);
                         setEstimations(keys.map(key => ({
                             ...estimations[key],
                             key
                         })));
-    
                     }
-    
-                    setProject(snap.val());
-    
                     setLoading(false);
                 }
             });   
@@ -79,7 +80,17 @@ const ProjectSection = (props) => {
         let version = '';
         return estimations.map(estimation => {
             let jsx = <div>
-                {version !== estimation.version && <h6>{estimation.version}</h6>}    
+                {
+                    version !== estimation.version && <h6
+                        className={
+                            `font-weight-bold ${
+                                estimation.category === 'backend' ? 'text-secondary' : estimation.category == 'frontend' ? 'text-primary' : 'text-success'
+                            }`
+                        }>{
+                            estimation.version
+                            }
+                        </h6>
+                }    
                 <EstimationItem
                     title={estimation.title}
                     details={estimation.details}
@@ -142,7 +153,7 @@ const ProjectSection = (props) => {
                 <div className="col-sm-12 col-md-6 col-xl-4 px-2 border-right">
 
                     <div className="d-flex justify-content-between">
-                    <h5>BACKEND</h5>
+                    <h5 className="mb-4">BACKEND</h5>
                     <span className="text-muted">
                         {
                             estimationList.filter(x => x.category == 'backend').reduce((a, c) => a + +c.time, 0)
@@ -153,43 +164,25 @@ const ProjectSection = (props) => {
                 </div>
                 <div className="col-sm-12 col-md-6 col-xl-4 px-2 border-right">
                     <div className="d-flex justify-content-between">
-                    <h5>FRONTEND</h5>
+                    <h5 className="mb-4">FRONTEND</h5>
                     <span className="text-muted">
                         {
                             estimationList.filter(x => x.category == 'frontend').reduce((a, c) => a + +c.time, 0)
                         }h
                     </span>
                     </div>
-                    {estimationList.filter(x => x.category == 'frontend').map(estimation => <EstimationItem
-                        title={estimation.title}
-                        details={estimation.details}
-                        time={estimation.time}
-                        category={estimation.category}
-                        key={estimation.key}
-                        author={estimation.author}
-                        editHandler={editEstimationHandler.bind(estimation.key)}
-                        deleteHandler={deleteEstimationHandler.bind(estimation.key)}
-                />)}
+                    {showEstimations(estimationList.filter(x => x.category == 'frontend'))}
                 </div>
                 <div className="col-sm-12 col-md-6 col-xl-4 px-2">
                     <div className="d-flex justify-content-between">
-                    <h5>UI/UX & DESIGN</h5>
+                    <h5 className="mb-4">UI/UX & DESIGN</h5>
                     <span className="text-muted">
                         {
                             estimationList.filter(x => x.category == 'ui/ux and design').reduce((a, c) => a + +c.time, 0)
                         }h
                     </span>
                     </div>
-                    {estimationList.filter(x => x.category == 'ui/ux and design').map(estimation => <EstimationItem
-                        title={estimation.title}
-                        details={estimation.details}
-                        time={estimation.time}
-                        category={estimation.category}
-                        key={estimation.key}
-                        author={estimation.author}
-                        editHandler={editEstimationHandler.bind(estimation.key)}
-                        deleteHandler={deleteEstimationHandler.bind(estimation.key)}
-                />)}
+                    {showEstimations(estimationList.filter(x => x.category == 'ui/ux and design'))}
                 </div>
             </div>
 
