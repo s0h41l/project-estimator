@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../../contexts/Auth';
 import firebase from 'firebase';
 import ProjectItem from '../../components/ProjectItem';
-import ProjectModal from '../../components/ProjectModal';
+import ProjectSection from '../../components/ProjectSection';
 
 const Dashboard = (props) => {
 
@@ -20,7 +20,7 @@ const Dashboard = (props) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState('');
     const [message, setMessage] = useState('');
-    const [showViewModal, setshowViewModal] = useState(false);
+    const [showProject, setshowProject] = useState(false);
 
     const [projects, setProjects] = useState([]);
     const [projectId, setProjectId] = useState('');
@@ -106,8 +106,11 @@ const Dashboard = (props) => {
 
     function viewProject(){
         if(this){
-            setProjectId(this);
-            setshowViewModal(true);
+            setshowProject(false);
+            setTimeout(() => {
+                setProjectId(this);
+                setshowProject(true);
+            }, 1);
         }
     }
 
@@ -141,102 +144,107 @@ const Dashboard = (props) => {
     }
 
     return (
-        <div>
-            {showViewModal && <ProjectModal
-                                id={projectId}
-                                closeEvent={() => setshowViewModal(false)}
-                            />}
+        <div className="container-fluid row">
+            <div className={ showProject ? 'col-sm-12 col-md-6 col-lg-6 col-xl-6 slide-open' : 'col-md-12 slide-open'}>
 
-            <div className="container my-4 px-0" style={{height: 25}}>
-                {formMode == '' && <button
-                                        className="btn btn-primary float-right"
-                                        onClick={() => setFormMode('create')}
-                                    >POST PROJECT</button>}
-            </div>
+                <div className="container my-4" style={{ height: 25 }}>
+                    {formMode == '' && <button
+                        className="btn btn-primary float-right"
+                        onClick={() => setFormMode('create')}
+                    >POST PROJECT</button>}
+                </div>
 
 
-            {formMode !== '' && <div className="container border my-3 p-3">
-                <h4 className="mb-4 text-info">
-                    {formMode == 'create' ? "NEW POST" : "UPDATE POST"}
-                </h4>
-                <form onSubmit={saveFormHandler}>
-                    <div className="form-group">
-                        <label
-                            htmlFor="name"
-                            >Project Name <span className="text-danger">*</span> 
+                {formMode !== '' && <div className="container border my-3 p-3">
+                    <h4 className="mb-4 text-info">
+                        {formMode == 'create' ? "NEW POST" : "UPDATE POST"}
+                    </h4>
+                    <form onSubmit={saveFormHandler}>
+                        <div className="form-group">
+                            <label
+                                htmlFor="name"
+                            >Project Name <span className="text-danger">*</span>
                             </label>
-                        <input
-                            type="text"
-                            name="name"
-                            className="form-control"
-                            placeholder="Enter project name"
-                            required
-                            value={name}
-                            onChange={event => setName(event.target.value)}
-                        />
-                    </div>
-                    <div className="form-control mb-2">
-                        <label
-                            htmlFor="description"
-                        >Description <span className="text-danger">*</span> 
-                        </label>
-                        <textarea
-                            name="description"
-                            rows="5"
-                            className="form-control"
-                            required
-                            value={description}
-                            onChange={event => setDescription(event.target.value)}
-                        />
-                    </div>
+                            <input
+                                type="text"
+                                name="name"
+                                className="form-control"
+                                placeholder="Enter project name"
+                                required
+                                value={name}
+                                onChange={event => setName(event.target.value)}
+                            />
+                        </div>
+                        <div className="form-control mb-2">
+                            <label
+                                htmlFor="description"
+                            >Description <span className="text-danger">*</span>
+                            </label>
+                            <textarea
+                                name="description"
+                                rows="5"
+                                className="form-control"
+                                required
+                                value={description}
+                                onChange={event => setDescription(event.target.value)}
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        className="btn btn-info">
-                        {formMode == 'create' ? "POST" : "UPDATE"}
-                    </button>
+                        <button
+                            type="submit"
+                            className="btn btn-info">
+                            {formMode == 'create' ? "POST" : "UPDATE"}
+                        </button>
 
-                    {formMode !== '' && <button
-                                        className="btn btn-secondary ml-1"
-                                        onClick={cancelFormHandler}>
-                                        CANCEL
-                                    </button>
-                    }
+                        {formMode !== '' && <button
+                            className="btn btn-secondary ml-1"
+                            onClick={cancelFormHandler}>
+                            CANCEL
+                        </button>
+                        }
 
-                </form>
-            </div>}
-
-
-            <div className="container px-0">
-                {error && <div className="alert alert-danger" role="alert">
-                    {error}
+                    </form>
                 </div>}
 
-                {message && <div className="alert alert-success" role="alert">
-                    {message}
-                </div>}
 
-                {loading && <p className="text-primary text-center">
-                    Loading....
-                </p>}
+                <div className="container">
+                    {error && <div className="alert alert-danger" role="alert">
+                        {error}
+                    </div>}
+
+                    {message && <div className="alert alert-success" role="alert">
+                        {message}
+                    </div>}
+
+                    {loading && <p className="text-primary text-center">
+                        Loading....
+                    </p>}
+                </div>
+
+                <div className="container mb-5">
+
+                    {projects.map(x => <ProjectItem
+                        name={x.name}
+                        key={x._id}
+                        description={x.description}
+                        deleteEvent={deleteProject.bind(x._id)}
+                        editEvent={editProject.bind(x._id)}
+                        addEstimate={addEstimate.bind(x._id)}
+                        viewProject={viewProject.bind(x._id)}
+                        canDelete={currentUser.uid == x.addedBy}
+                        canEdit={currentUser.uid == x.addedBy}
+                    />)}
+
+                </div>
+
+
             </div>
-
-            <div className="container px-0 mb-5">
-
-                {projects.map(x => <ProjectItem
-                                        name={x.name}
-                                        key={x._id}
-                                        description={x.description}
-                                        deleteEvent={deleteProject.bind(x._id)}
-                                        editEvent={editProject.bind(x._id)}
-                                        addEstimate={addEstimate.bind(x._id)}
-                                        viewProject={viewProject.bind(x._id)}
-                                        canDelete={currentUser.uid == x.addedBy}
-                                        canEdit={currentUser.uid == x.addedBy}
-                                    />)}
-                
+            <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6 pt-4">
+                {showProject && <ProjectSection
+                    id={projectId}
+                    closeEvent={() => setshowProject(false)}
+                />}
             </div>
-
         </div>
     );
 }

@@ -42,7 +42,7 @@ const EstimationForm = (props) => {
 
         try {
 
-            await firebase.database().ref('projects').child(`${projectId}/estimations`).push(estimation);
+            await firebase.database().ref('projects').child(`${projectId}/estimations`).push(estimation);            
 
             clearFields();
 
@@ -63,7 +63,6 @@ const EstimationForm = (props) => {
         setTitle('');
         setTime('');
         setDetails('');
-        setVersion('');
     }
 
     return (
@@ -84,19 +83,6 @@ const EstimationForm = (props) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="title">Title <span className="text-danger">*</span></label>
-                    <input
-                        type="text"
-                        name="title"
-                        className="form-control form-control-sm"
-                        placeholder="Enter title"
-                        required
-                        value={title}
-                        onChange={event => setTitle(event.target.value)}
-                    />
-                </div>
-
-                <div className="form-group">
                     <label htmlFor="version">Version <span className="text-danger">*</span></label>
                     <input
                         type="text"
@@ -106,6 +92,19 @@ const EstimationForm = (props) => {
                         required
                         value={version}
                         onChange={event => setVersion(event.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="title">Title <span className="text-danger">*</span></label>
+                    <input
+                        type="text"
+                        name="title"
+                        className="form-control form-control-sm"
+                        placeholder="Enter title"
+                        required
+                        value={title}
+                        onChange={event => setTitle(event.target.value)}
                     />
                 </div>
 
