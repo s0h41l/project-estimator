@@ -10,7 +10,7 @@ const ProjectSection = (props) => {
     const {
         id,
         closeEvent = () => console.log('Close modal event.'),
-        addEstimateEvent = () => console.log('Add Estimate vent.'),
+        addEstimateEvent = () => console.log('Add Estimate event.'),
     } = props;
 
 
@@ -21,6 +21,8 @@ const ProjectSection = (props) => {
         }
     }, [])
 
+    const [formMode, setFormMode] = useState('create');
+    const [editItemId, setEditItemId] = useState('xxxxxxx');
     const [loading, setLoading] = useState(false);
     const [project, setProject] = useState({});
     const [estimationList, setEstimations] = useState([]);
@@ -56,8 +58,40 @@ const ProjectSection = (props) => {
         }
     }
 
-    async function editEstimationHandler(){
-        console.log(this);
+    function showEstimations(estimations){
+        let version = '';
+        return estimations.map(estimation => {
+            let jsx = <div key={estimation.key}>
+                {
+                    version !== estimation.version && <h6
+                        className={
+                            `font-weight-bold border-bottom ${
+                                estimation.category  ===  'backend' 
+                                    ? 'text-secondary border-secondary' :
+                                    estimation.category === 'frontend' ?
+                                    'text-primary border-primary' :
+                                    'text-success border-success'
+                            }`
+                        }>{
+                            estimation.version
+                            }
+                        </h6>
+                }    
+                <EstimationItem
+                    title={estimation.title}
+                    details={estimation.details}
+                    time={estimation.time}
+                    category={estimation.category}
+                    author={estimation.author}
+                    editHandler={updateEstimation.bind(estimation.key)}
+                    deleteHandler={deleteEstimationHandler.bind(estimation.key)}
+                />
+            </div>
+
+            version = estimation.version;
+            return jsx;
+        })
+
     }
 
     async function deleteEstimationHandler(){
@@ -76,41 +110,9 @@ const ProjectSection = (props) => {
         }
     }
 
-    function showEstimations(estimations){
-        let version = '';
-        return estimations.map(estimation => {
-            let jsx = <div>
-                {
-                    version !== estimation.version && <h6
-                        className={
-                            `font-weight-bold border-bottom ${
-                                estimation.category === 'backend' 
-                                    ? 'text-secondary border-secondary' :
-                                    estimation.category == 'frontend' ?
-                                    'text-primary border-primary' :
-                                    'text-success border-success'
-                            }`
-                        }>{
-                            estimation.version
-                            }
-                        </h6>
-                }    
-                <EstimationItem
-                    title={estimation.title}
-                    details={estimation.details}
-                    time={estimation.time}
-                    category={estimation.category}
-                    key={estimation.key}
-                    author={estimation.author}
-                    editHandler={editEstimationHandler.bind(estimation.key)}
-                    deleteHandler={deleteEstimationHandler.bind(estimation.key)}
-                />
-            </div>
-
-            version = estimation.version;
-            return jsx;
-        })
-
+    async function updateEstimation(){
+        setEditItemId(this);
+        setFormMode('edit');
     }
 
 
@@ -125,12 +127,18 @@ const ProjectSection = (props) => {
                             onClick={closeEvent}
                         >Close</button>
             </div>
-            <p className="project-details mt-3">{project.description}</p>
+            <div
+                className="project-details mt-3"
+                dangerouslySetInnerHTML={{__html: project.description}}
+            ></div>
 
             <hr />
 
             <EstimationForm
                 projectId={id}
+                mode={formMode}
+                editFormCancel={() => setFormMode('create')}
+                estimationId={editItemId}
             />
 
             <div className="container my-4">
@@ -160,33 +168,33 @@ const ProjectSection = (props) => {
                     <h5 className="mb-4">BACKEND</h5>
                     <span className="text-muted">
                         {
-                            estimationList.filter(x => x.category == 'backend').reduce((a, c) => a + +c.time, 0)
+                            estimationList.filter(x => x.category === 'backend').reduce((a, c) => a + +c.time, 0)
                         }h
                     </span>
                     </div>
-                    {showEstimations(estimationList.filter(x => x.category == 'backend'))}
+                    {showEstimations(estimationList.filter(x => x.category === 'backend'))}
                 </div>
                 <div className="col-sm-12 col-md-6 col-xl-4 px-2 border-right">
                     <div className="d-flex justify-content-between">
                     <h5 className="mb-4">FRONTEND</h5>
                     <span className="text-muted">
                         {
-                            estimationList.filter(x => x.category == 'frontend').reduce((a, c) => a + +c.time, 0)
+                            estimationList.filter(x => x.category === 'frontend').reduce((a, c) => a + +c.time, 0)
                         }h
                     </span>
                     </div>
-                    {showEstimations(estimationList.filter(x => x.category == 'frontend'))}
+                    {showEstimations(estimationList.filter(x => x.category === 'frontend'))}
                 </div>
                 <div className="col-sm-12 col-md-6 col-xl-4 px-2">
                     <div className="d-flex justify-content-between">
                     <h5 className="mb-4">UI/UX & DESIGN</h5>
                     <span className="text-muted">
                         {
-                            estimationList.filter(x => x.category == 'ui/ux and design').reduce((a, c) => a + +c.time, 0)
+                            estimationList.filter(x => x.category === 'ui/ux and design').reduce((a, c) => a + +c.time, 0)
                         }h
                     </span>
                     </div>
-                    {showEstimations(estimationList.filter(x => x.category == 'ui/ux and design'))}
+                    {showEstimations(estimationList.filter(x => x.category === 'ui/ux and design'))}
                 </div>
             </div>
 

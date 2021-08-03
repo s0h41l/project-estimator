@@ -19,7 +19,8 @@ const ProjectItem = (props) => {
             </div>
             <div
                 className="card-body"
-                >{description.substr(0, 800)}{description.length > 800 && "..."}
+                dangerouslySetInnerHTML={{__html: description}}
+                >
             </div>
             <div className="card-footer">
                 {canDelete && <button

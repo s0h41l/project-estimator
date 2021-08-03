@@ -7,7 +7,7 @@ import { AuthContext } from '../contexts/Auth';
 const EstimationItem = (props) => {
 
     const { currentUser } = useContext(AuthContext);
-    const [personName, setPersonName]= useState('Anonymous');
+    const [personName, setPersonName] = useState('Anonymous');
     const {
         editHandler = () => console.log('Edit handler!'),
         deleteHandler= () => console.log('Delete Handler')
@@ -31,7 +31,7 @@ const EstimationItem = (props) => {
     }, [])
 
     return (
-        <div className={`card my-3 ${category == 'backend' ? 'bg-secondary text-white' : category == 'frontend' ? 'bg-primary text-white': 'bg-success text-white'}`}>
+        <div className={`card my-3 ${category === 'backend' ? 'bg-secondary text-white' : category === 'frontend' ? 'bg-primary text-white': 'bg-success text-white'}`}>
             <div
                 className="card-header pt-1 pb-0 pl-2 mb-0 d-flex justify-content-between">
                 <p className="text-bold my-0">
@@ -45,7 +45,7 @@ const EstimationItem = (props) => {
             <div className="card-footer py-1 px-2">
                 <div className="d-flex justify-content-between">
                     <small>{personName}</small>
-                    { currentUser.uid == author && <div>
+                    { currentUser.uid === author && <div>
                         <button
                             onClick={editHandler}
                             className="btn btn-sm btn-xs btn-info mx-1"

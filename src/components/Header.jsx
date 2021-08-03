@@ -14,7 +14,6 @@ const Header = (props) => {
     useEffect(() => {
         firebase.database().ref('users').child(currentUser.uid).once('value', (snap) => {
 
-            console.log(currentUser.uid, snap.val());
             if(snap.val()){
                 const { name } = snap.val();
                 setName(name);

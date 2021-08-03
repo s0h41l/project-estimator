@@ -1,6 +1,7 @@
-import { useState, useEffect, useContext, useRef } from 'react';
-import { AuthContext } from '../../contexts/Auth';
+import { useState, useEffect, useContext } from 'react';
 import firebase from 'firebase';
+import { CKEditor } from 'ckeditor4-react';
+import { AuthContext } from '../../contexts/Auth';
 import ProjectItem from '../../components/ProjectItem';
 import ProjectSection from '../../components/ProjectSection';
 
@@ -32,16 +33,18 @@ const Dashboard = (props) => {
     const saveFormHandler = async (event) => {
         
         setLoading(true);
-        const { name, description } = event.target.elements;
+        const { name } = event.target.elements;
 
         try {
          
             event.preventDefault();
 
-            if(formMode == 'create'){
+            console.log(description);
+
+            if(formMode === 'create'){
                 await firebase.database().ref('projects').push({
                     name: name.value,
-                    description: description.value,
+                    description: description,
                     addedBy: currentUser.uid
                 });
         
@@ -49,7 +52,7 @@ const Dashboard = (props) => {
             }else{
                 await firebase.database().ref('projects').child(projectId).update({
                     name: name.value,
-                    description: description.value
+                    description: description
                 });
         
                 setMessage('Project Updated!');
@@ -145,10 +148,11 @@ const Dashboard = (props) => {
 
     return (
         <div className="container-fluid row">
+
             <div className={ showProject ? 'col-sm-12 col-md-6 col-lg-6 col-xl-6 slide-open' : 'col-md-12 slide-open'}>
 
                 <div className="container my-4" style={{ height: 25 }}>
-                    {formMode == '' && <button
+                    {formMode === '' && <button
                         className="btn btn-primary float-right"
                         onClick={() => setFormMode('create')}
                     >POST PROJECT</button>}
@@ -157,7 +161,7 @@ const Dashboard = (props) => {
 
                 {formMode !== '' && <div className="container border my-3 p-3">
                     <h4 className="mb-4 text-info">
-                        {formMode == 'create' ? "NEW POST" : "UPDATE POST"}
+                        {formMode === 'create' ? "NEW POST" : "UPDATE POST"}
                     </h4>
                     <form onSubmit={saveFormHandler}>
                         <div className="form-group">
@@ -180,20 +184,31 @@ const Dashboard = (props) => {
                                 htmlFor="description"
                             >Description <span className="text-danger">*</span>
                             </label>
-                            <textarea
+
+                            <CKEditor
+                                initData={description}
+                                onChange={({editor}) => {
+                                    console.log(editor.getData());
+                                    setDescription(editor.getData());
+                                }}
+                                name="description"
+                            />
+
+
+                            {/* <textarea
                                 name="description"
                                 rows="5"
                                 className="form-control"
                                 required
                                 value={description}
                                 onChange={event => setDescription(event.target.value)}
-                            />
+                            /> */}
                         </div>
 
                         <button
                             type="submit"
                             className="btn btn-info">
-                            {formMode == 'create' ? "POST" : "UPDATE"}
+                            {formMode ==='create' ? "POST" : "UPDATE"}
                         </button>
 
                         {formMode !== '' && <button
@@ -231,8 +246,8 @@ const Dashboard = (props) => {
                         editEvent={editProject.bind(x._id)}
                         addEstimate={addEstimate.bind(x._id)}
                         viewProject={viewProject.bind(x._id)}
-                        canDelete={currentUser.uid == x.addedBy}
-                        canEdit={currentUser.uid == x.addedBy}
+                        canDelete={currentUser.uid === x.addedBy}
+                        canEdit={currentUser.uid === x.addedBy}
                     />)}
 
                 </div>

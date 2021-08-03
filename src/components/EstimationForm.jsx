@@ -1,11 +1,16 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import firebase from 'firebase';
 import { AuthContext } from '../contexts/Auth';
 
 const EstimationForm = (props) => {
 
     const { currentUser } = useContext(AuthContext);
-    const { projectId } = props;
+    const {
+        projectId,
+        mode = 'create',
+        editFormCancel = () => console.log('Edit form cancel event!'),
+        estimationId = 'hfdjhskjdhkjhds'
+    } = props;
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -17,12 +22,52 @@ const EstimationForm = (props) => {
     const [time, setTime] = useState('');
     const [details, setDetails] = useState('');
 
+    const formContainerRef = useRef();
+
+    useEffect(() => {
+        setLoading(true);
+        try {
+
+            if(mode === 'edit'){
+                firebase.database().ref(`projects/${projectId}/estimations/${estimationId}`).once('value', snap => {
+                    if(snap.val()){
+                        const {
+                            title = '',
+                            details = '',
+                            time = '',
+                            version = '',
+                            category = ''
+                        } = snap.val();
+
+                        setTitle(title);
+                        setDetails(details);
+                        setTime(time);
+                        setVersion(version);
+                        setCategory(category);
+
+                        formContainerRef.current.scrollIntoView();
+                    }
+
+                    setLoading(false);
+                })
+            }else{
+                setTitle('');
+                setDetails('');
+                setVersion('');
+                setTime(0);
+            }
+            
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+        }
+    }, [mode, estimationId])
+
     const saveHandler = async (event) => {
         event.preventDefault();
 
         setLoading(true);
         
-
         const {
             category,
             title,
@@ -42,15 +87,26 @@ const EstimationForm = (props) => {
 
         try {
 
-            await firebase.database().ref('projects').child(`${projectId}/estimations`).push(estimation);            
+            if(mode === 'create'){
+                await firebase.database().ref('projects').child(`${projectId}/estimations`).push(estimation);            
 
-            clearFields();
+                clearFields();
+    
+                setMessage('Estimation Added!');
+                
+                setLoading(false)
+    
+                setTimeout(() => setMessage(''), 15*1000);
+            }else{
+                
+                await firebase.database().ref(`projects/${projectId}/estimations/${estimationId}`).update(estimation);
+                
+                setMessage('Estimation Updated!');
 
-            setMessage('Estimation Added!');
-            
-            setLoading(false)
+                setTimeout(() => setMessage(''), 15*1000)
 
-            setTimeout(() => setMessage(''), 1500);
+                setLoading(false);
+            }
             
         } catch (error) {
             setError(error.message);
@@ -66,8 +122,8 @@ const EstimationForm = (props) => {
     }
 
     return (
-        <div className="container border border-info my-3 py-3">
-            <h4 className="text-info">ADD ESTIMATION</h4>
+        <div className="container border border-info my-3 py-3" ref={formContainerRef}>
+            <h4 className="text-info">{ mode === 'create' ? 'ADD' : 'EDIT' } ESTIMATION</h4>
 
             <form onSubmit={saveHandler}> 
                 <div className="form-group">
@@ -76,9 +132,9 @@ const EstimationForm = (props) => {
                         name="category"
                         className="form-control w-75"
                     >
-                        <option value="backend">Backend</option>
-                        <option value="frontend">Frontend</option>
-                        <option value="ui/ux and design">UI/UX & Design</option>
+                        <option value="backend" defaultValue={category === 'backend'}>Backend</option>
+                        <option value="frontend" defaultValue={category === 'frontend'}>Frontend</option>
+                        <option value="ui/ux and design" defaultValue={category == 'ui/ux and design'}>UI/UX & Design</option>
                     </select>
                 </div>
 
@@ -150,11 +206,18 @@ const EstimationForm = (props) => {
                 </div>
 
                 <div className="form-group" style={{height: 10}}>
+                    {mode === 'edit' &&                     <a
+                        className="btn btn-sm btn-secondary a-button float-right"
+                        onClick={editFormCancel}    
+                    >
+                    CANCEL
+                    </a>}
                     <button
                         type="submit"
-                        className="btn btn-sm btn-info float-right"
+                        className="btn btn-sm btn-info float-right mr-1"
+                        disabled={loading}
                     >
-                        ADD
+                        {mode === 'create' ? 'ADD' : 'UPDATE'}
                     </button>
                 </div>
             </form>
