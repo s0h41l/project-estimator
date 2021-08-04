@@ -44,28 +44,15 @@ const EstimationItem = (props) => {
             </div>
             <div className="card-body p-2">
                 <small>{details}</small>
-                <div className="text-white">
-                    <table className="text-small mt-3">
-                        <tbody>
-                            <tr>
-                                <td>Created: </td>
-                                <td>{moment(createdAt).format('lll')}</td>
-                            </tr>
-
-                            <tr>
-                                <td>Updated: </td>
-                                <td>{moment(updatedAt).format('lll')}</td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
             </div>
             <div className="card-footer py-1 px-2">
                 <div className="d-flex justify-content-between">
                     <span
                         className='estimator-name text-white pointer'
-                        title={personName}
+                        title={
+                            `${personName}\nC: ${moment(createdAt).format('lll')} \nU: ${moment(updatedAt).format('lll')}`
+                        }
+
                     >{personName[0].toUpperCase()}</span>
                     { currentUser.uid === author && <div>
                         <button
