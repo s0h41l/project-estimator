@@ -40,6 +40,24 @@ html {
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
 }
+
 .a-button {
     color: white !important; 
+}
+
+.pointer {
+    cursor: pointer;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+}
+
+.estimator-name {
+    font-weight: bold;
+}
+
+.text-small {
+    font-size: 10px;
+    font-weight: bold;
 }

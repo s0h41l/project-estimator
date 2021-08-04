@@ -4,13 +4,15 @@ const ProjectItem = (props) => {
     const {
         name = '',
         description = '',
+        file = '',
         canDelete = false,
         canEdit = false,
         canAddEstimate = false,
         deleteEvent = () => console.log('Delete Event.'),
         editEvent = () => console.log('Edit Event.'),
         addEstimate = () => console.log('Add Estimate Event.'),
-        viewProject = () => console.log('View Project Event.')
+        viewProject = () => console.log('View Project Event.'),
+        downloadFile = () => console.log('Download file event.')
     } = props;
     return (
         <div className="card my-3">
@@ -24,18 +26,26 @@ const ProjectItem = (props) => {
             </div>
             <div className="card-footer">
                 {canDelete && <button
-                                className="btn btn-sm btn-danger float-right"
-                                onClick={deleteEvent}
-                                >DELETE</button>}
+                    className="btn btn-sm btn-danger float-right"
+                    onClick={deleteEvent}
+                >DELETE</button>}
                 {canEdit && <button
-                                className="btn btn-sm btn-info float-right mx-1"
-                                onClick={editEvent}
-                                >EDIT</button>}
+                    className="btn btn-sm btn-info float-right mx-1"
+                    onClick={editEvent}
+                >EDIT</button>}
+
+                {file && <button
+                    target="_blank"
+                    className="btn btn-sm btn-secondary float-right"
+                    onClick={downloadFile}
+                >FILE</button>}
 
                 <button
-                                className="btn btn-sm btn-primary mr-1"
-                                onClick={viewProject}
-                                >VIEW PROJECT</button>
+                    className="btn btn-sm btn-primary mr-1"
+                    onClick={viewProject}
+                >VIEW PROJECT</button>
+
+            
             </div>
         </div>
     );

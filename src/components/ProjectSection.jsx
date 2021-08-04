@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import firebase from 'firebase';
 import EstimationForm from './EstimationForm';
 import EstimationItem from './EstimationItem';
+import VersionContainer from './VersionContainer';
+import  _  from 'lodash';
 
 
 const ProjectSection = (props) => {
@@ -34,7 +36,9 @@ const ProjectSection = (props) => {
         try {
 
             firebase.database().ref(`projects`).child(id).on('value', (snap) => {
-                setProject(snap.val());
+                if(snap.val()){
+                    setProject(snap.val());
+                }
                 setLoading(false);
             });  
 
@@ -60,35 +64,34 @@ const ProjectSection = (props) => {
 
     function showEstimations(estimations){
         let version = '';
-        return estimations.map(estimation => {
-            let jsx = <div key={estimation.key}>
-                {
-                    version !== estimation.version && <h6
-                        className={
-                            `font-weight-bold border-bottom ${
-                                estimation.category  ===  'backend' 
-                                    ? 'text-secondary border-secondary' :
-                                    estimation.category === 'frontend' ?
-                                    'text-primary border-primary' :
-                                    'text-success border-success'
-                            }`
-                        }>{
-                            estimation.version
-                            }
-                        </h6>
-                }    
-                <EstimationItem
-                    title={estimation.title}
-                    details={estimation.details}
-                    time={estimation.time}
-                    category={estimation.category}
-                    author={estimation.author}
-                    editHandler={updateEstimation.bind(estimation.key)}
-                    deleteHandler={deleteEstimationHandler.bind(estimation.key)}
-                />
-            </div>
+        
+        return _.values(_.groupBy(estimations, 'version')).map(_estimations => {
 
-            version = estimation.version;
+
+            console.log(_estimations[0]?.category, _estimations[0]?.version);
+
+            let jsx = <VersionContainer
+                category={_estimations[0]?.category}
+                version={_estimations[0]?.version}
+                time = {_estimations.reduce((a, c) => a + +c?.time, 0)}
+            >{_estimations.map(estimation => {
+
+                return <div key={estimation.key}>
+
+                    <EstimationItem
+                        title={estimation.title}
+                        details={estimation.details}
+                        time={estimation.time}
+                        category={estimation.category}
+                        author={estimation.author}
+                        createdAt={estimation.createdAt}
+                        updatedAt={estimation.updatedAt}
+                        editHandler={updateEstimation.bind(estimation.key)}
+                        deleteHandler={deleteEstimationHandler.bind(estimation.key)}
+                    />
+                </div>
+            })}</VersionContainer>;
+
             return jsx;
         })
 

@@ -4,6 +4,7 @@ import { CKEditor } from 'ckeditor4-react';
 import { AuthContext } from '../../contexts/Auth';
 import ProjectItem from '../../components/ProjectItem';
 import ProjectSection from '../../components/ProjectSection';
+import { storage } from '../../utils/firebase';
 
 const Dashboard = (props) => {
 
@@ -15,6 +16,8 @@ const Dashboard = (props) => {
     //Contexts
     const { currentUser } = useContext(AuthContext);
 
+
+    const allInputs = { imgUrl: '' };
 
     // States
     const [formMode, setFormMode] = useState('');
@@ -29,6 +32,11 @@ const Dashboard = (props) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
+    const [file, setFile] = useState('');
+    const [imageAsUrl, setImageAsUrl] = useState(allInputs);
+
+    const [uploadPercentage, setUploadPercentage] = useState('');
+
     // Event Handlers
     const saveFormHandler = async (event) => {
         
@@ -39,31 +47,107 @@ const Dashboard = (props) => {
          
             event.preventDefault();
 
-            console.log(description);
-
             if(formMode === 'create'){
-                await firebase.database().ref('projects').push({
-                    name: name.value,
-                    description: description,
-                    addedBy: currentUser.uid
-                });
-        
-                setMessage('Project Posted!');
-            }else{
-                await firebase.database().ref('projects').child(projectId).update({
-                    name: name.value,
-                    description: description
-                });
-        
-                setMessage('Project Updated!');
-                setFormMode('');
-            }
-            
-            clearFields();
-            
-            setLoading(false);
 
-            setTimeout(() => setMessage(''), 1500);
+                if(file){
+
+                    const fileName = `${new Date().getTime()}-${file.name}`;
+
+                    const uploadTask = storage.ref(`/files/${fileName}`).put(file);
+                    
+                    uploadTask.on('state_changed', snap => {
+
+                    setUploadPercentage(
+                        `${Math.floor((snap._delegate.bytesTransferred / snap._delegate.totalBytes)*100)}%`
+                    );
+
+                    }, err => {
+                        setError(err);
+                    }, async () => {
+                        await firebase.database().ref('projects').push({
+                            name: name.value,
+                            description: description,
+                            addedBy: currentUser.uid,
+                            file: fileName,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP,
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+
+                        setLoading(false);
+                        
+                        setMessage('Project Posted!');
+
+                        clearFields();
+            
+                        setTimeout(() => {
+                            setFormMode('');
+                            setMessage('');
+                            setUploadPercentage('');
+                        }, 1500);
+                    });
+                }else{
+                    alert('Select file please.');
+                }
+
+            }else{
+
+                if(file){
+
+                    const fileName = `${new Date().getTime()}-${file.name}`;
+
+                    const uploadTask = storage.ref(`/files/${fileName}`).put(file);
+                    
+                    uploadTask.on('state_changed', snap => {
+
+                    setUploadPercentage(
+                        `${Math.floor((snap._delegate.bytesTransferred / snap._delegate.totalBytes)*100)}%`
+                    );
+
+                    }, err => {
+                        setError(err);
+                    }, async () => {
+
+                        await firebase.database().ref('projects').child(projectId).update({
+                            name: name.value,
+                            description: description,
+                            file: fileName,
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                
+                        setMessage('Project Updated!');
+        
+                        setLoading(false);
+
+                        clearFields();
+                    
+                        setTimeout(() => {
+                            setFormMode('');
+                            setMessage('');
+                            setUploadPercentage('');
+                        }, 1500);
+
+                    });
+
+                }else{
+                    await firebase.database().ref('projects').child(projectId).update({
+                        name: name.value,
+                        description: description,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+            
+                    setMessage('Project Updated!');
+    
+                    setLoading(false);
+
+                    clearFields();
+                
+                    setTimeout(() => {
+                        setFormMode('');
+                        setMessage('');
+                        setUploadPercentage('');
+                    }, 1500);
+                }
+            }
             
         } catch (error) {
             setError(error.message);
@@ -139,6 +223,7 @@ const Dashboard = (props) => {
     function clearFields(){
         setName('');
         setDescription('');
+        setFile(null);
     }
 
     function cancelFormHandler(){
@@ -146,10 +231,33 @@ const Dashboard = (props) => {
         clearFields();
     }
 
+    async function handlefile(e){
+        setLoading(true);
+        try {
+
+            const image = e.target.files[0];
+            setFile(image);
+    
+            setLoading(false);
+            
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    }
+
+    function downloadFile(){
+        storage.ref('files').child(this).getDownloadURL()
+        .then(fireBaseUrl => {
+            window.open(fireBaseUrl)
+        })
+
+    }
+
     return (
         <div className="container-fluid row">
 
-            <div className={ showProject ? 'col-sm-12 col-md-6 col-lg-6 col-xl-6 slide-open' : 'col-md-12 slide-open'}>
+            <div className={ showProject && !formMode ? 'col-sm-12 col-md-6 col-lg-6 col-xl-6 slide-open' : 'col-md-12 slide-open'}>
 
                 <div className="container my-4" style={{ height: 25 }}>
                     {formMode === '' && <button
@@ -188,21 +296,34 @@ const Dashboard = (props) => {
                             <CKEditor
                                 initData={description}
                                 onChange={({editor}) => {
-                                    console.log(editor.getData());
                                     setDescription(editor.getData());
                                 }}
                                 name="description"
                             />
 
+                        </div>
 
-                            {/* <textarea
-                                name="description"
-                                rows="5"
+                        <div className="form-group">
+                            <label htmlFor="file">File</label>
+                            <input
+                                type="file"
                                 className="form-control"
-                                required
-                                value={description}
-                                onChange={event => setDescription(event.target.value)}
-                            /> */}
+                                onChange={handlefile}
+                                required={(formMode === 'create')}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <div class="progress">
+                                <div
+                                    class="progress-bar bg-primary"
+                                    style={{width: uploadPercentage}}
+                                    role="progressbar"
+                                    aria-valuenow="25"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                >{uploadPercentage}</div>
+                            </div>
                         </div>
 
                         <button
@@ -222,44 +343,48 @@ const Dashboard = (props) => {
                 </div>}
 
 
-                <div className="container">
-                    {error && <div className="alert alert-danger" role="alert">
-                        {error}
-                    </div>}
+                {formMode === "" && <div>
+                    <div className="container">
+                        {error && <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>}
 
-                    {message && <div className="alert alert-success" role="alert">
-                        {message}
-                    </div>}
+                        {message && <div className="alert alert-success" role="alert">
+                            {message}
+                        </div>}
 
-                    {loading && <p className="text-primary text-center">
-                        Loading....
-                    </p>}
-                </div>
+                        {loading && <p className="text-primary text-center">
+                            Loading....
+                        </p>}
+                    </div>
 
-                <div className="container mb-5">
+                    <div className="container mb-5">
 
-                    {projects.map(x => <ProjectItem
-                        name={x.name}
-                        key={x._id}
-                        description={x.description}
-                        deleteEvent={deleteProject.bind(x._id)}
-                        editEvent={editProject.bind(x._id)}
-                        addEstimate={addEstimate.bind(x._id)}
-                        viewProject={viewProject.bind(x._id)}
-                        canDelete={currentUser.uid === x.addedBy}
-                        canEdit={currentUser.uid === x.addedBy}
-                    />)}
+                        {projects.map(x => <ProjectItem
+                            name={x.name}
+                            key={x._id}
+                            description={x.description}
+                            file={x.file}
+                            deleteEvent={deleteProject.bind(x._id)}
+                            editEvent={editProject.bind(x._id)}
+                            addEstimate={addEstimate.bind(x._id)}
+                            viewProject={viewProject.bind(x._id)}
+                            canDelete={currentUser.uid === x.addedBy}
+                            canEdit={currentUser.uid === x.addedBy}
+                            downloadFile={downloadFile.bind(x.file)}
+                        />)}
 
-                </div>
-
+                    </div>
+                </div>}
 
             </div>
-            <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6 pt-4">
+
+            {formMode == '' && <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6 pt-4">
                 {showProject && <ProjectSection
                     id={projectId}
                     closeEvent={() => setshowProject(false)}
                 />}
-            </div>
+            </div>}
         </div>
     );
 }

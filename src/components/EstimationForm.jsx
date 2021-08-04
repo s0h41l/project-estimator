@@ -5,6 +5,7 @@ import { AuthContext } from '../contexts/Auth';
 const EstimationForm = (props) => {
 
     const { currentUser } = useContext(AuthContext);
+
     const {
         projectId,
         mode = 'create',
@@ -82,13 +83,18 @@ const EstimationForm = (props) => {
             details: details.value,
             time: time.value,
             version: version.value,
-            author: currentUser.uid
+            author: currentUser.uid,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
         }
 
         try {
 
             if(mode === 'create'){
-                await firebase.database().ref('projects').child(`${projectId}/estimations`).push(estimation);            
+
+                await firebase.database().ref('projects').child(`${projectId}/estimations`).push({
+                    ...estimation,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });            
 
                 clearFields();
     
@@ -132,9 +138,11 @@ const EstimationForm = (props) => {
                         name="category"
                         className="form-control w-75"
                     >
-                        <option value="backend" defaultValue={category === 'backend'}>Backend</option>
+
+                        <option value={currentUser.role}>{currentUser.role.toUpperCase()}</option>
+                        {/* <option value="backend" defaultValue={category === 'backend'}>Backend</option>
                         <option value="frontend" defaultValue={category === 'frontend'}>Frontend</option>
-                        <option value="ui/ux and design" defaultValue={category == 'ui/ux and design'}>UI/UX & Design</option>
+                        <option value="ui/ux and design" defaultValue={category == 'ui/ux and design'}>UI/UX & Design</option> */}
                     </select>
                 </div>
 

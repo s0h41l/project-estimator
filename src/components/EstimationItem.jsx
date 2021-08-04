@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import firebase from 'firebase';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { RiEdit2Line } from 'react-icons/ri'
+import * as moment from 'moment';
 import { AuthContext } from '../contexts/Auth';
 
 const EstimationItem = (props) => {
@@ -18,7 +19,9 @@ const EstimationItem = (props) => {
         details = '',
         time = 0,
         category = 'backend',
-        author = 'Ou0WYGouqdRmoYhmrzgDERT9xkd2'
+        author = 'Ou0WYGouqdRmoYhmrzgDERT9xkd2',
+        createdAt = 0,
+        updatedAt  = 0
     } = props;
 
     useEffect(() => {
@@ -41,10 +44,29 @@ const EstimationItem = (props) => {
             </div>
             <div className="card-body p-2">
                 <small>{details}</small>
+                <div className="text-white">
+                    <table className="text-small mt-3">
+                        <tbody>
+                            <tr>
+                                <td>Created: </td>
+                                <td>{moment(createdAt).format('lll')}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Updated: </td>
+                                <td>{moment(updatedAt).format('lll')}</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div className="card-footer py-1 px-2">
                 <div className="d-flex justify-content-between">
-                    <small>{personName}</small>
+                    <span
+                        className='estimator-name text-white pointer'
+                        title={personName}
+                    >{personName[0].toUpperCase()}</span>
                     { currentUser.uid === author && <div>
                         <button
                             onClick={editHandler}
