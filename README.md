@@ -1,6 +1,3 @@
-# Getting Started with Create React App
-
-
 ## Start Application
 
 In the project directory, you can run:
